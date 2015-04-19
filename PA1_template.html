@@ -302,9 +302,9 @@ axis(1, at=1:288, labels = averagePerTimeInterval$intervalInHoursAndMinutes)
 <pre><code class="r">missingValuesCount  &lt;- sum((is.na(activityData$steps)))
 </code></pre>
 
-<p>There are <code>2304</code> in the dataset.</p>
+<p>There are <code>2304</code> missing values in the dataset.</p>
 
-<p>We want to devise a strategy for filling in all of the missing values in the dataset. We are going to use the mean for that 5-minute interval to fill in the reading for all 5 minutes interval that have missing values.</p>
+<p>We want to devise a strategy for filling in all of the missing values in the dataset. We are going to use the mean across all days of the same 5-minute interval to fill in the missing readings.</p>
 
 <p>Let&#39;s create a new dataset where we are going to replace all the missing values.</p>
 
@@ -340,9 +340,9 @@ hist(totalPerDayPolyfill$steps, freq = TRUE, breaks = 12, xlab=&quot;Steps&quot;
 <pre><code class="r">percentMissingValues  &lt;- sprintf(&#39;%.2g%%&#39;,length(activityData$steps[is.na(activityData$steps)]) / length(activityData$steps) * 100)
 </code></pre>
 
-<p>Missing values are roughly 13% of the overall data. After replacing all missing values with the average number of steps for that same time interva, the data has maintained its normal distribution but the frequency of days where the number of steps are above 10000 has increased as well as the frequency of the overall distribution.</p>
+<p>Missing values are roughly 13% of the overall data. After replacing all missing values with the average number of steps for that same time interval, the data has maintained its normal distribution but the frequency of days where the number of steps are above 10000 has increased as well as the frequency throughout the distribution.</p>
 
-<p>Having introduced average values to fill in the NA&#39;s has led to the <em>Median</em> to match the <em>Mean</em>.</p>
+<p>Having introduced average values to fill in the NA&#39;s has led to the <em>Median</em> and <em>Mean</em> to match.</p>
 
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
 
@@ -367,7 +367,7 @@ xyplot(averagePerTimeIntervalPolyfill$steps~averagePerTimeIntervalPolyfill$inter
 
 <p>From the plot of the two sets of activities we can see that during weekends there is no single great spike of activity around 08:35 which instead is showin during weekdays, also during weekends activity remains higher during the course of day and does not see a sharp decrease after the morning spike.</p>
 
-<p>From this last plot it seems that the individual during weekdays does most of his/her steps during what might be commuting to work but his/her activity level decreases soon after and remains pretty low throughout the day with a slight increase in the late evening. During weekends the level of activity remains higher throug</p>
+<p>From this last plot it seems that during weekdays the individual did  most of his/her steps during what might have been commuting to work but his/her activity level decreased soon after and remained pretty low throughout the day with a slight increase in the late evening. During weekends the level of activity instead remained higher throughout the day.</p>
 
 </body>
 

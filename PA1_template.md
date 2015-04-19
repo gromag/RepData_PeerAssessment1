@@ -217,5 +217,5 @@ xyplot(averagePerTimeIntervalPolyfill$steps~averagePerTimeIntervalPolyfill$inter
 
 From the plot of the two sets of activities we can see that during weekends there is no single great spike of activity around 08:35 which instead is showin during weekdays, also during weekends activity remains higher during the course of day and does not see a sharp decrease after the morning spike.
 
-From this last plot it seems that during weekdays the individual did  most of his/her steps during what might have been commuting to work but his/her activity level decreased soon after and remained pretty low throughout the day with a slight increase in the late evening. During weekends the level of activity instead remained higher throughout the day.
+From this last plot it seems that during weekdays the individual increased the amount of steps during what might have been commuting to work but his/her activity level decreased soon after and remained lower throughout the day with a slight increase in the late evening. During weekends the level of activity instead remained higher and more homogeneous throughout the day.
 

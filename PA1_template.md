@@ -28,7 +28,7 @@ activityData  <- read.csv("activity.csv", header = TRUE)
 unlink("activity.csv")
 ```
 
-First and foremost let's explore the raw data to get a sense of how its format.
+First and foremost let's explore the raw data to get a sense of what is its format.
 
 
 ```r

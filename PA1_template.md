@@ -1,6 +1,11 @@
-# Reproducible Research: Peer Assessment 1
-Giuseppe Romagnuolo  
-Wednesday, April 15, 2015  
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "Giuseppe Romagnuolo"
+date: "Wednesday, April 15, 2015"
+output: 
+  html_document:
+    keep_md: true
+---
 
 ### Introduction
 
@@ -23,7 +28,7 @@ activityData  <- read.csv("activity.csv", header = TRUE)
 unlink("activity.csv")
 ```
 
-Exploring the raw data:
+First and foremost let's explore the raw data to get a sense of how its format.
 
 
 ```r
@@ -37,24 +42,14 @@ str(activityData)
 ##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
-Transforming the ```activityData$date``` field from *Factor* to *Date*
+From the output above we see that the date is coming as a *Factor*, converting it to a *Date* is more suitable for 
+our analysis and let's output a summary.
 
 
 ```r
 activityData$date  <- as.Date(activityData$date, "%Y-%m-%d")
 
-str(activityData)
-```
-
-```
-## 'data.frame':	17568 obs. of  3 variables:
-##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
-##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
-##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
-```
-
-```r
-summary(activityData)
+summary(activityData) 
 ```
 
 ```
@@ -71,21 +66,21 @@ summary(activityData)
 
 ## What is mean total number of steps taken per day?
 
-Calculate the total number of steps taken per day.
-Make a histogram of the total number of steps taken each day.
-Calculate and report the mean and median of the total number of steps taken per day
+Let's plot the distribuition of the total number of steps taken per day.
 
 
 ```r
 totalPerDay  <- aggregate(steps ~ date, activityData, FUN=sum, na.action = na.omit)
 
-hist(totalPerDay$steps, freq = TRUE, breaks = 12, xlab="Number of steps", main="Histogram of total number of steps taken each day")
+hist(totalPerDay$steps, freq = TRUE, breaks = 12, xlab="Steps", main="Distribution of total steps taken per day (na omitted)")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
 
 ```r
-mean(totalPerDay$steps)
+meanTotal  <- mean(totalPerDay$steps)
+
+meanTotal
 ```
 
 ```
@@ -100,10 +95,12 @@ median(totalPerDay$steps)
 ## [1] 10765
 ```
 
+From the plot we can see that the distribuition of the total number of steps taken per day is normal and has a mean of ``10766.2``.
+
 
 ## What is the average daily activity pattern?
 
-1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+Let's first calculate the average number of steps grouped by intervals, we are going to ignore (omit) any missed readings.
 
 
 ```r
@@ -114,45 +111,38 @@ averagePerTimeInterval$intervalInHoursAndMinutes <-  sprintf("%02d:%02d",
                                             averagePerTimeInterval$interval%/%100, 
                                             averagePerTimeInterval$interval%%100) 
 
+maxStepsInterval  <- averagePerTimeInterval$intervalInHoursAndMinutes[which(averagePerTimeInterval$steps == max(averagePerTimeInterval$steps))]
+```
 
-plot(averagePerTimeInterval$steps, type="l", xaxt = "n", ylab="Average Steps", xlab="Time of day")
+
+In the following plot we can see the average daily activity across all days, we can see a spike in activity between 07:30 and 10:00 with its peak number of steps in the 5 minutes slot commencing at ``08:35``, reaching an average of ``206.17`` in only 5 minutes.
+
+
+
+
+```r
+plot(averagePerTimeInterval$steps, type="l", xaxt = "n", ylab="Average Steps", xlab="Time of day", main = "Average daily activity pattern")
 
 axis(1, at=1:288, labels = averagePerTimeInterval$intervalInHoursAndMinutes)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
 
-2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-
-
-```r
-averagePerTimeInterval[which(averagePerTimeInterval$steps == max(averagePerTimeInterval$steps)), c(3, 2)]
-```
-
-```
-##     intervalInHoursAndMinutes    steps
-## 104                     08:35 206.1698
-```
 
 ## Imputing missing values
 
-Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
-
-1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+As we have noticed in our initial exploratory analysis there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
 
 ```r
-sum((is.na(activityData$steps)))
+missingValuesCount  <- sum((is.na(activityData$steps)))
 ```
 
-```
-## [1] 2304
-```
+There are ``2304`` in the dataset.
 
+We want to devise a strategy for filling in all of the missing values in the dataset. We are going to use the mean for that 5-minute interval to fill in the reading for all 5 minutes interval that have missing values.
 
-2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
-
-3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+Let's create a new dataset where we are going to replace all the missing values.
 
 
 ```r
@@ -164,15 +154,16 @@ activityDataPolyfill  <- activityData
 activityDataPolyfill$steps[is.na(activityDataPolyfill$steps)]  <- missingSteps
 ```
 
-4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+Similarly to what we have done before with the initial dataset, we are going to make a histogram plot of the total number of steps taken each day using the newly generated dataset which has had all its missing values replaced, we are going to calculate and report the mean and median total number of steps taken per day. 
+
 
 ```r
 totalPerDayPolyfill  <- aggregate(steps ~ date, activityDataPolyfill, FUN=sum)
 
-hist(totalPerDayPolyfill$steps, freq = TRUE, breaks = 12, xlab="Number of steps", main="Histogram of total number of steps taken each day")
+hist(totalPerDayPolyfill$steps, freq = TRUE, breaks = 12, xlab="Steps", main="Distribution of total steps taken per day (na replaced)")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
 ```r
 mean(totalPerDayPolyfill$steps)
@@ -195,38 +186,22 @@ median(totalPerDayPolyfill$steps)
 percentMissingValues  <- sprintf('%.2g%%',length(activityData$steps[is.na(activityData$steps)]) / length(activityData$steps) * 100)
 ```
 
-Missing values are roughly 13% of the overall data. After replacing all missing values with the average number of steps for that same time interval across all days, the data has maintained the same distribution but the number of days where the number of steps are above 10000 has increased.
+Missing values are roughly 13% of the overall data. After replacing all missing values with the average number of steps for that same time interva, the data has maintained its normal distribution but the frequency of days where the number of steps are above 10000 has increased as well as the frequency of the overall distribution.
 
-Also the *Median* now matches the *Mean*.
-
-
+Having introduced average values to fill in the NA's has led to the *Median* to match the *Mean*.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
-
-1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+Let's create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
 
 ```r
 isWeekend  <- weekdays(activityDataPolyfill$date, TRUE) %in% c("Sun", "Sat")
 
 activityDataPolyfill$dayOfWeek  <- factor(isWeekend, levels = c(TRUE, FALSE), labels = c("weekend", "weekday"))
-
-head(activityDataPolyfill)
 ```
 
-```
-##       steps       date interval dayOfWeek
-## 1 1.7169811 2012-10-01        0   weekday
-## 2 0.3396226 2012-10-01        5   weekday
-## 3 0.1320755 2012-10-01       10   weekday
-## 4 0.1509434 2012-10-01       15   weekday
-## 5 0.0754717 2012-10-01       20   weekday
-## 6 2.0943396 2012-10-01       25   weekday
-```
-
-2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+Let's create a time series plot of the average number of steps taken, averaged across all weekday days or weekend days. 
 
 
 ```r
@@ -238,5 +213,9 @@ xyplot(averagePerTimeIntervalPolyfill$steps~averagePerTimeIntervalPolyfill$inter
        layout = c(1,2), type="l", ylab="Steps", xlab="Interval")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
+
+From the plot of the two sets of activities we can see that during weekends there is no single great spike of activity around 08:35 which instead is showin during weekdays, also during weekends activity remains higher during the course of day and does not see a sharp decrease after the morning spike.
+
+From this last plot it seems that the individual during weekdays does most of his/her steps during what might be commuting to work but his/her activity level decreases soon after and remains pretty low throughout the day with a slight increase in the late evening. During weekends the level of activity remains higher throug
 
